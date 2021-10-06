@@ -27,4 +27,14 @@ public class Item implements Tile
 		Texture tex = TextureManager.get(texStr);
 		cam.drawImage(bg, tex.getImage(), x, y, 1.0, 1.0);
 	}
+	
+	public Texture getTexture()
+	{
+		return TextureManager.get(texStr);
+	}
+	
+	public boolean isPickable()
+	{
+		return true;
+	}
 }

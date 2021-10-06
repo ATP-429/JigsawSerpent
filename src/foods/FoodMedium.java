@@ -4,7 +4,7 @@ public class FoodMedium extends Food
 {
 	public FoodMedium()
 	{
-		size = 2;
+		size = 10;
 		texStr = "food_medium";
 	}
 }

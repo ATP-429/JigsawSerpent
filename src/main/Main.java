@@ -3,6 +3,7 @@ package main;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -18,6 +19,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JFrame;
 
 import Utility.Vector2i;
+import foods.Food;
 import keys.BlueKey;
 import texture.TextureManager;
 
@@ -32,6 +34,7 @@ public class Main extends Canvas implements MouseListener, MouseMotionListener, 
 	
 	Camera cam;
 	Space space;
+	Player player;
 	
 	MouseEvent prevMouseE;
 	
@@ -60,6 +63,27 @@ public class Main extends Canvas implements MouseListener, MouseMotionListener, 
 	
 	public void init() throws InterruptedException //Thread.sleep() throws an InterruptedException, so we have to make the function do so too, or surround Thread.sleep() with try catch. Again, ignore this
 	{
+		TextureManager.addTexture("blue_key", "res/textures/blue_key.png");
+		TextureManager.addTexture("food", "res/textures/food.png");
+		
+		space = new Space();
+		cam = new Camera();
+		player = new Player();
+		
+		cam.calibrate(RENDER_WIDTH, RENDER_WIDTH, DEFAULT_PPU);
+		
+		space.put(5, 4, new BlueKey());
+		space.put(3, 9, new BlueKey());
+		space.put(15, 0, new BlueKey());
+		
+		for (int i = 10; i <= 20; i++)
+			for(int j = 10; j <= 20; j++)
+				space.put(i, j, new Food());
+		
+		space.add(player);
+		
+		player.getInventory().add(new BlueKey());
+		
 		frame = new JFrame(); //Creates a window
 		frame.setResizable(false); //Now window cannot be resized by moving its borders
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -74,15 +98,6 @@ public class Main extends Canvas implements MouseListener, MouseMotionListener, 
 		//setLocationRelativeTo just sets the window's position on the screen with respect to another component 
 		frame.setLocationRelativeTo(null); //If the argument is 'null', it just puts the window at the centre of the screen
 		
-		TextureManager.addTexture("blue_key", "res/textures/blue_key.png");
-		TextureManager.addTexture("small_food", "res/textures/small_food.png");
-		
-		space = new Space();
-		cam = new Camera();
-		cam.calibrate(RENDER_WIDTH, RENDER_WIDTH, DEFAULT_PPU);
-		space.put(0, 0, new BlueKey());
-		space.put(1, 1, new BlueKey());
-		
 		//We want around 60 frames per second. That is, we want 60 frames to be displayed every 1s = 1000ms
 		//So, 60 frames = 1000 ms
 		//=> 1 frame = 1000/60 ms
@@ -92,6 +107,7 @@ public class Main extends Canvas implements MouseListener, MouseMotionListener, 
 		int fps = 0;
 		while (true)
 		{
+			update();
 			repaint(); //Draws new frame (Calls update())
 			fps++;
 			
@@ -107,12 +123,18 @@ public class Main extends Canvas implements MouseListener, MouseMotionListener, 
 		}
 	}
 	
-	//We need to do this because when repaint() is called, the original update() method of Canvas class clears the screen before calling paint()
-	//We never want to clear the screen. Explanation as to why given in paint() method
-	@Override
-	public void update(Graphics g)
+	public void update()
 	{
-		paint(g);
+		Input input = new Input();
+		if (prevMouseE != null)
+			input.mouse = cam.getAbsoluteLocation(getPixelRelativeTo(prevMouseE));
+		input.keys = this.keys;
+		
+		player.setInput(input); //Set player's input to inputs captured from canvas. This input will then be interpreted in Space update() method
+		
+		cam.setPos(player.getSnake().getHead());
+		
+		space.update();
 	}
 	
 	@Override
@@ -139,6 +161,13 @@ public class Main extends Canvas implements MouseListener, MouseMotionListener, 
 		bg.translate(RENDER_WIDTH / 2, RENDER_HEIGHT / 2); //Makes (0, 0) the centre of our screen
 		
 		cam.render(space, bg);
+		
+		bg.translate(-RENDER_WIDTH / 2, -RENDER_HEIGHT / 2);
+		
+		player.getInventory().render(bg);
+		bg.setFont(new Font(bg.getFont().getFontName(), Font.PLAIN, 24));
+		bg.setColor(Color.BLACK);
+		bg.drawString("SIZE : " + player.getSnake().getBody().size(), 10, RENDER_HEIGHT - 10);
 		
 		//Draws bufferImg on our original canvas
 		g.drawImage(bufferImg, 0, 0, WIDTH, HEIGHT, null);
@@ -238,5 +267,13 @@ public class Main extends Canvas implements MouseListener, MouseMotionListener, 
 	private Vector2i getPixelInOrigScreen(int x, int y)
 	{
 		return new Vector2i((double) x / WIDTH * RENDER_WIDTH, (double) y / HEIGHT * RENDER_HEIGHT);
+	}
+	
+	//We need to do this because when repaint() is called, the original update() method of Canvas class clears the screen before calling paint()
+	//We never want to clear the screen. Explanation as to why given in paint() method
+	@Override
+	public void update(Graphics g)
+	{
+		paint(g);
 	}
 }

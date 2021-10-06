@@ -1,5 +1,7 @@
 package main;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -13,7 +15,6 @@ public class Camera
 	
 	private double fontHeight = 0.4; //Height of font in units IN SPACE DIMENSIONS
 	private double fontOffset = 0.1; //Offset of font from the axes IN SPACE DIMENSIONS
-	private double snapRadius = 0.4; //GRAPHICAL RADIUS of snap IN SPACE DIMENSIONS
 	
 	public Camera()
 	{
@@ -31,8 +32,8 @@ public class Camera
 	public void calibrate(int WIDTH, int HEIGHT, double ppu)
 	{
 		this.ppu = ppu;
-		this.setXUnitsOnScreen((double) (WIDTH) / ppu); //Calculates number of units btwn centre and 'higher' dimension. [pixels / pixels per unit = units]
-		this.setYUnitsOnScreen((double) (HEIGHT) / ppu);
+		this.setXUnitsOnScreen((double) (WIDTH / 2) / ppu); //Calculates number of units btwn centre and edge of screen. [pixels / pixels per unit = units]
+		this.setYUnitsOnScreen((double) (HEIGHT / 2) / ppu);
 	}
 	
 	//Returns absolute coordinate of pixel in Space, if coordinate of a pixel is passed wrt centre of cam
@@ -96,7 +97,7 @@ public class Camera
 	public void render(Space space, Graphics2D bg)
 	{
 		double[] bounds = this.getBounds();
-		double xLeft = bounds[0], xRight = bounds[1], yUp = bounds[2], yDown = bounds[3];
+		double xLeft = bounds[0], yUp = bounds[1], xRight = bounds[2], yDown = bounds[3];
 		
 		translate(bg);
 		
@@ -104,9 +105,21 @@ public class Camera
 		for (int x = (int) xLeft; x <= xRight; x++)
 			for (int y = (int) yDown; y <= yUp; y++)
 				if (x >= 0 && y >= 0)
-					if (space.tiles[x][y] != null)
-						space.tiles[x][y].render(this, x, y, bg);
+					if (space.get(x, y) != null)
+						space.get(x, y).render(this, x, y, bg);
 					
+		for (Player player : space.getPlayers())
+		{
+			Snake snake = player.getSnake();
+			snake.render(this, bg);
+		}
+		
+		//Draws border of Space [That is, rectangle beyond which we would go out of bounds]
+		bg.setColor(Color.RED);
+		bg.setStroke(new BasicStroke((int) (0.2 * this.getPPU())));
+		this.drawRect(bg, 0, 0, space.getWIDTH(), space.getHEIGHT());
+		bg.setStroke(new BasicStroke(1));
+		
 		reset(bg);
 	}
 	
