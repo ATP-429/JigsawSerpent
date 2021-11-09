@@ -5,28 +5,36 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
+import java.util.List;
 
 import Utility.Vector2i;
 import Utility.Vector3i;
+import events.SnakeEvent;
 import foods.Food;
 
 public class Snake
 {
+	protected List<SnakeEvent> events;
+	
 	public static final int DEFAULT_SNAKE_LENGTH = 50;
 	public static final double MAX_TURN_ANGLE = 0.15;
-	public static final double SNAKE_UNIT = 0.1;
+	public static final double SNAKE_UNIT = 0.05;
 	
 	public static final int MAX_SNAKE_LENGTH = 200;
 	
+	//SNAKE FEATURES
 	public static final double SNAKE_BORDER_WIDTH = 0.01; //Thickness of snake's border
-	
-	public static double speed = 1.0;
+	public static final double SNAKE_EYE_RADIUS = 0.05;
+	public static final double SNAKE_EYE_SEPARATION = 0.15;
 	
 	private double snakeWidth = 0.3;
 	
-	private Deque<Vector2i> body;
+	public int speed = 1;
+	
+	private ArrayDeque<Vector2i> body;
 	private Vector2i tail, head;
 	private int foodEaten;
 	
@@ -34,7 +42,7 @@ public class Snake
 	{
 		tail = new Vector2i(4, 4);
 		head = tail;
-		body = new LinkedList<Vector2i>();
+		body = new ArrayDeque<Vector2i>();
 		foodEaten = 0;
 		
 		//Add default body parts to snake (Default snake is facing east and its tail starts at (0, 0))
@@ -43,12 +51,14 @@ public class Snake
 		
 		for (Vector2i dir : body)
 			head = head.add(dir);
+		
+		events = new ArrayList<SnakeEvent>();
 	}
 	
-	public void moveTowards(Vector2i point)
+	public Vector2i getDir(Vector2i point)
 	{
 		Vector2i dir = point.subtract(head); //Get the next body part of snake based on where snake wants to move towards
-		if (dir.getMagnitude() >= 5 * SNAKE_UNIT) //Move only if next body part is greater than 5 snake units, that is, snake moves by a signifcant amount
+		//if (dir.getMagnitude() >= 5 * SNAKE_UNIT) //Move only if next body part is greater than 5 snake units, that is, snake moves by a signifcant amount
 		{
 			//Rotate only by MAX_TURN_ANGLE even if snake is told to move to an angle larger than that
 			if (Vector2i.angleBetween(dir, body.peekLast()) >= MAX_TURN_ANGLE)
@@ -60,11 +70,29 @@ public class Snake
 				else
 					dir = newDir2;
 			}
-			addBody(dir.normalize().multiply(SNAKE_UNIT));
+		}
+		return dir.normalize().multiply(SNAKE_UNIT);
+	}
+	
+	//NOTE: MAKES SNAKE MOVE TOWARDS 'DIR' BY ADDING 'DIR' TO ITS BODY
+	//THIS MEANS MAGNITUDE OF 'DIR' SHOULD BE EQUAL TO SNAKE_UNIT
+	public void moveTowardsDir(Vector2i dir)
+	{
+		dir = dir.normalize().multiply(SNAKE_UNIT);
+		for (int i = 0; i < speed; i++)
+		{
+			addBody(dir);
 			removeTail();
 		}
 	}
 	
+	public void moveTowardsPoint(Vector2i point)
+	{
+		Vector2i dir = getDir(point);
+		moveTowardsDir(dir);
+	}
+	
+	//NOTE : LEFT AND RIGHT DO NOT NECESSARILY MEAN IT'S ACTUALLY THE LEFT OR RIGHT SIDE OF SNAKE. LEFT AND RIGHT IS JUST TO DIFFERENTIATE BETWEEN THE TWO SIDES.
 	public void render(Camera cam, Graphics2D bg)
 	{
 		Vector2i prevSpine = this.getTail(), prevSpineLeft = null, prevSpineRight = null, nextSpineLeft = null, nextSpineRight = null;
@@ -122,14 +150,16 @@ public class Snake
 		}
 		
 		//Draw snake head as bezier curve
+		Vector2i perp = body.peekLast().cross(new Vector3i(0, 0, 1)).toVector2i().normalize();
 		
-		Vector2i controlPoint = this.getHead().add(body.peekLast().multiply(2));
+		Vector2i controlPoint1 = this.getHead().add(body.peekLast().multiply(8)).subtract(perp.multiply(0.2));
+		Vector2i controlPoint2 = this.getHead().add(body.peekLast().multiply(8)).add(perp.multiply(0.2));
 		
 		GeneralPath path = new GeneralPath(GeneralPath.WIND_NON_ZERO);
 		path.moveTo(prevSpineLeft.x, prevSpineLeft.y);
 		path.lineTo(prevSpineRight.x, prevSpineRight.y);
 		
-		path.curveTo(controlPoint.x, controlPoint.y, controlPoint.x, controlPoint.y, prevSpineLeft.x, prevSpineLeft.y);
+		path.curveTo(controlPoint1.x, controlPoint1.y, controlPoint2.x, controlPoint2.y, prevSpineLeft.x, prevSpineLeft.y);
 		
 		AffineTransform scaleAT = new AffineTransform();
 		scaleAT.scale(cam.getPPU(), cam.getPPU());
@@ -141,6 +171,21 @@ public class Snake
 		bg.setStroke(new BasicStroke((float) (SNAKE_BORDER_WIDTH * cam.getPPU())));
 		bg.draw(path);
 		bg.setStroke(new BasicStroke(1));
+		
+		//Draw snake's eyes
+		bg.setColor(Color.WHITE);
+		Vector2i leftEye = this.getHead().add(body.peekLast().multiply(3)).add(perp.multiply(SNAKE_EYE_SEPARATION / 2));
+		Vector2i rightEye = this.getHead().add(body.peekLast().multiply(3)).subtract(perp.multiply(SNAKE_EYE_SEPARATION / 2));
+		cam.fillOvalAt(bg, leftEye.x, leftEye.y, SNAKE_EYE_RADIUS, SNAKE_EYE_RADIUS);
+		cam.fillOvalAt(bg, rightEye.x, rightEye.y, SNAKE_EYE_RADIUS, SNAKE_EYE_RADIUS);
+		bg.setColor(Color.BLACK);
+		cam.drawOvalAt(bg, leftEye.x, leftEye.y, SNAKE_EYE_RADIUS, SNAKE_EYE_RADIUS);
+		cam.drawOvalAt(bg, rightEye.x, rightEye.y, SNAKE_EYE_RADIUS, SNAKE_EYE_RADIUS);
+	}
+	
+	public void addEvent(SnakeEvent event)
+	{
+		events.add(event);
 	}
 	
 	public void eat(Food food)
@@ -188,4 +233,14 @@ public class Snake
 	{
 		return snakeWidth;
 	}
+	
+	public List<SnakeEvent> getEvents()
+	{
+		return events;
+	}
+}
+
+enum Action
+{
+	IDLE;
 }

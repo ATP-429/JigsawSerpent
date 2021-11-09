@@ -24,8 +24,7 @@ public class Item implements Tile
 	@Override
 	public void render(Camera cam, double x, double y, Graphics2D bg)
 	{
-		Texture tex = TextureManager.get(texStr);
-		cam.drawImage(bg, tex.getImage(), x, y, 1.0, 1.0);
+		cam.drawImage(bg, TextureManager.get(texStr).getImage(), x, y, 1.0, 1.0);
 	}
 	
 	public Texture getTexture()

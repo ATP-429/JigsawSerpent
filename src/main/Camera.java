@@ -1,11 +1,11 @@
 package main;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import Utility.Vector2i;
+import enemies.Entity;
 
 public class Camera
 {
@@ -108,17 +108,22 @@ public class Camera
 					if (space.get(x, y) != null)
 						space.get(x, y).render(this, x, y, bg);
 					
+		for(Entity entity : space.getEntities())
+		{
+			entity.render(this, bg);
+		}
+		
 		for (Player player : space.getPlayers())
 		{
 			Snake snake = player.getSnake();
 			snake.render(this, bg);
 		}
 		
+		
 		//Draws border of Space [That is, rectangle beyond which we would go out of bounds]
-		bg.setColor(Color.RED);
-		bg.setStroke(new BasicStroke((int) (0.2 * this.getPPU())));
-		this.drawRect(bg, 0, 0, space.getWIDTH(), space.getHEIGHT());
-		bg.setStroke(new BasicStroke(1));
+		/*bg.setColor(Color.RED);
+		this.drawRect(bg, 0, 0, space.getWIDTH(), space.getHEIGHT());*/
+		
 		
 		reset(bg);
 	}
@@ -154,22 +159,34 @@ public class Camera
 	
 	public void drawRect(Graphics2D bg, double x, double y, double width, double height)
 	{
-		bg.drawRect((int) (x * this.getPPU()), (int) (y * this.getPPU()), (int) (int) (width * this.getPPU()), (int) (height * this.getPPU()));
+		bg.drawRect((int) (x * this.getPPU()), (int) (y * this.getPPU()), (int) (width * this.getPPU()), (int) (height * this.getPPU()));
 	}
 	
 	public void fillRect(Graphics2D bg, double x, double y, double width, double height)
 	{
-		bg.fillRect((int) (x * this.getPPU()), (int) (y * this.getPPU()), (int) (int) (width * this.getPPU()), (int) (height * this.getPPU()));
+		bg.fillRect((int) (x * this.getPPU()), (int) (y * this.getPPU()),  (int) (width * this.getPPU()), (int) (height * this.getPPU()));
 	}
 	
 	public void drawOval(Graphics2D bg, double x, double y, double r1, double r2)
 	{
-		bg.drawOval((int) (x * this.getPPU()), (int) (y * this.getPPU()), (int) (int) (r1 * this.getPPU()), (int) (r2 * this.getPPU()));
+		bg.drawOval((int) (x * this.getPPU()), (int) (y * this.getPPU()),  (int) (r1 * this.getPPU()), (int) (r2 * this.getPPU()));
+	}
+	
+	//Draws oval such that (x, y) is the centre of oval and r1, r2 are radii
+	public void drawOvalAt(Graphics2D bg, double x, double y, double r1, double r2)
+	{
+		bg.drawOval((int) ((x-r1) * this.getPPU()), (int) ((y-r2) * this.getPPU()),  (int) (2*r1 * this.getPPU()), (int) (2*r2 * this.getPPU()));
 	}
 	
 	public void fillOval(Graphics2D bg, double x, double y, double r1, double r2)
 	{
-		bg.fillOval((int) (x * this.getPPU()), (int) (y * this.getPPU()), (int) (int) (r1 * this.getPPU()), (int) (r2 * this.getPPU()));
+		bg.fillOval((int) (x * this.getPPU()), (int) (y * this.getPPU()),  (int) (r1 * this.getPPU()), (int) (r2 * this.getPPU()));
+	}
+	
+	//Fills oval such that (x, y) is the centre of oval and r1, r2 are radii
+	public void fillOvalAt(Graphics2D bg, double x, double y, double r1, double r2)
+	{
+		bg.fillOval((int) ((x-r1) * this.getPPU()), (int) ((y-r2) * this.getPPU()),  (int) (2*r1 * this.getPPU()), (int) (2*r2 * this.getPPU()));
 	}
 	
 	public void drawString(Graphics2D bg, String str, double x, double y)

@@ -1,9 +1,15 @@
 package main;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import Utility.Vector2i;
+import enemies.Entity;
+import events.AttackEvent;
+import events.Event;
+import events.SnakeEvent;
 import foods.Food;
 import items.Item;
 import tiles.Tile;
@@ -13,12 +19,14 @@ public class Space
 	private final int WIDTH = 100, HEIGHT = 100; //Number of tiles in x and y directions
 	
 	private List<Player> players;
+	private List<Entity> entities;
 	private Tile[][] tiles;
 	
 	public Space()
 	{
 		tiles = new Tile[getWIDTH()][getHEIGHT()];
 		players = new ArrayList<Player>();
+		entities = new ArrayList<Entity>();
 	}
 	
 	public void update()
@@ -29,9 +37,43 @@ public class Space
 			Snake snake = player.getSnake();
 			Inventory inventory = player.getInventory();
 			Vector2i head = snake.getHead();
+			List<SnakeEvent> events = snake.getEvents();
 			
-			snake.moveTowards(input.mouse);
+			//Handle player's inputs
+			if (input.keys[KeyEvent.VK_SHIFT])
+				snake.speed = 2;
+			else
+				snake.speed = 1;
 			
+			if (input.mouseButtons[MouseEvent.BUTTON1] && !input.prevMouseButtons[MouseEvent.BUTTON1]) //LMB
+				snake.addEvent(new AttackEvent());
+			
+			for (int i = 0; i < events.size(); i++)
+			{
+				SnakeEvent event = events.get(i);
+				
+				event.apply(snake);
+				
+				event.tick();
+				if (event.isOver())
+				{
+					events.remove(i);
+					i--;
+				}
+			}
+			
+			Vector2i dir = snake.getDir(input.mouse);
+			
+			//Handle collisions
+			/*if (Maths.areIntersecting(head, head.add(dir), new Vector2i(0, 0), new Vector2i(WIDTH, 0)) || Maths.areIntersecting(head, head.add(dir), new Vector2i(0, HEIGHT), new Vector2i(WIDTH, HEIGHT))) //If snake will collide with upper or lower boundary of space
+				dir = new Vector2i(dir.x, 0);
+			
+			if (Maths.areIntersecting(head, head.add(dir), new Vector2i(WIDTH, 0), new Vector2i(WIDTH, HEIGHT)) || Maths.areIntersecting(head, head.add(dir), new Vector2i(0, 0), new Vector2i(0, HEIGHT))) //If snake will collide with right or left boundary of space
+				dir = new Vector2i(0, dir.y);*/
+			if(events.isEmpty())
+				snake.moveTowardsDir(dir);
+			
+			//Handle tile stuff
 			Tile tile = this.get(head.x, head.y);
 			
 			if (tile instanceof Food)
@@ -50,6 +92,11 @@ public class Space
 					this.clearTile(head.x, head.y);
 				}
 			}
+		}
+		
+		for (Entity entity : entities)
+		{
+			entity.update();
 		}
 	}
 	
@@ -87,10 +134,17 @@ public class Space
 		return players;
 	}
 	
+	public List<Entity> getEntities()
+	{
+		return entities;
+	}
+	
 	public void add(Object o)
 	{
 		if (o instanceof Player)
 			players.add((Player) o);
+		else if (o instanceof Entity)
+			entities.add((Entity) o);
 	}
 	
 	public int getWIDTH()
