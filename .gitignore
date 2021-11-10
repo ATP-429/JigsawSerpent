@@ -7,3 +7,6 @@
 
 #Ignore bin file
 bin/
+
+#Ignore res file, since it'll be a pain to version control it.
+res/

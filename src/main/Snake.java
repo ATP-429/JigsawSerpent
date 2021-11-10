@@ -29,14 +29,19 @@ public class Snake
 	public static final double SNAKE_BORDER_WIDTH = 0.01; //Thickness of snake's border
 	public static final double SNAKE_EYE_RADIUS = 0.05;
 	public static final double SNAKE_EYE_SEPARATION = 0.15;
+	public static final int SNAKE_DEFAULT_SPEED = 1;
 	
 	private double snakeWidth = 0.3;
 	
-	public int speed = 1;
+	public int speed = SNAKE_DEFAULT_SPEED;
 	
 	private ArrayDeque<Vector2i> body;
 	private Vector2i tail, head;
 	private int foodEaten;
+	
+	private double units = 0;
+	
+	public Vector2i dir;
 	
 	public Snake()
 	{
@@ -55,6 +60,7 @@ public class Snake
 		events = new ArrayList<SnakeEvent>();
 	}
 	
+	//Returns the direction in which snake must move, if coordinates of mouse are passed to this function
 	public Vector2i getDir(Vector2i point)
 	{
 		Vector2i dir = point.subtract(head); //Get the next body part of snake based on where snake wants to move towards

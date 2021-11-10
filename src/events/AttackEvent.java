@@ -14,7 +14,13 @@ public class AttackEvent extends SnakeEvent
 	public void apply(Snake snake)
 	{
 		snake.speed = 3;
-		snake.moveTowardsDir(snake.getBody().peekLast());
+		//snake.moveTowardsDir(snake.getBody().peekLast());
+		snake.dir = snake.getBody().peekLast();
+	}
+	
+	@Override
+	public void end(Snake snake)
+	{
 		snake.speed = 1;
 	}
 }

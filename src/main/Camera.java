@@ -121,8 +121,8 @@ public class Camera
 		
 		
 		//Draws border of Space [That is, rectangle beyond which we would go out of bounds]
-		/*bg.setColor(Color.RED);
-		this.drawRect(bg, 0, 0, space.getWIDTH(), space.getHEIGHT());*/
+		bg.setColor(Color.RED);
+		this.drawRect(bg, 0, 0, space.getWIDTH(), space.getHEIGHT());
 		
 		
 		reset(bg);

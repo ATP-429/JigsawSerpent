@@ -8,4 +8,9 @@ public class SnakeEvent extends Event
 	{
 		
 	}
+	
+	public void end(Snake snake)
+	{
+		
+	}
 }

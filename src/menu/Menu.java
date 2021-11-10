@@ -30,12 +30,10 @@ public class Menu
 	
 	public void clickAt(Vector2i pos)
 	{
-		System.out.println("Click at " + pos);
 		for (Button button : buttons)
 		{
 			if (pos.x >= button.x && pos.x < button.x + button.width && pos.y >= button.y && pos.y < button.y + button.height)
 			{
-				System.out.println("Button clicked");
 				button.onClick.run();
 			}
 		}

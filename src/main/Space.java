@@ -1,14 +1,15 @@
 package main;
 
 import java.awt.event.KeyEvent;
+
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import Utility.Maths;
 import Utility.Vector2i;
 import enemies.Entity;
 import events.AttackEvent;
-import events.Event;
 import events.SnakeEvent;
 import foods.Food;
 import items.Item;
@@ -43,7 +44,7 @@ public class Space
 			if (input.keys[KeyEvent.VK_SHIFT])
 				snake.speed = 2;
 			else
-				snake.speed = 1;
+				snake.speed = Snake.SNAKE_DEFAULT_SPEED;
 			
 			if (input.mouseButtons[MouseEvent.BUTTON1] && !input.prevMouseButtons[MouseEvent.BUTTON1]) //LMB
 				snake.addEvent(new AttackEvent());
@@ -57,6 +58,7 @@ public class Space
 				event.tick();
 				if (event.isOver())
 				{
+					event.end(snake);
 					events.remove(i);
 					i--;
 				}
@@ -64,14 +66,19 @@ public class Space
 			
 			Vector2i dir = snake.getDir(input.mouse);
 			
-			//Handle collisions
-			/*if (Maths.areIntersecting(head, head.add(dir), new Vector2i(0, 0), new Vector2i(WIDTH, 0)) || Maths.areIntersecting(head, head.add(dir), new Vector2i(0, HEIGHT), new Vector2i(WIDTH, HEIGHT))) //If snake will collide with upper or lower boundary of space
-				dir = new Vector2i(dir.x, 0);
+			if (!events.isEmpty()) //If snake is doing some action, set dir to snake's direction
+				dir = snake.dir;
 			
-			if (Maths.areIntersecting(head, head.add(dir), new Vector2i(WIDTH, 0), new Vector2i(WIDTH, HEIGHT)) || Maths.areIntersecting(head, head.add(dir), new Vector2i(0, 0), new Vector2i(0, HEIGHT))) //If snake will collide with right or left boundary of space
-				dir = new Vector2i(0, dir.y);*/
-			if(events.isEmpty())
-				snake.moveTowardsDir(dir);
+			//Handle collisions
+			Vector2i finalPos = head.add(dir.multiply(snake.speed));
+			if (Maths.areIntersecting(head, finalPos, new Vector2i(0, 0), new Vector2i(WIDTH, 0)) || Maths.areIntersecting(head, finalPos, new Vector2i(0, HEIGHT), new Vector2i(WIDTH, HEIGHT))) //If snake will collide with upper or lower boundary of space
+				dir = new Vector2i(dir.x, 0);
+			finalPos = head.add(dir.multiply(snake.speed));
+			
+			if (Maths.areIntersecting(head, finalPos, new Vector2i(WIDTH, 0), new Vector2i(WIDTH, HEIGHT)) || Maths.areIntersecting(head, finalPos, new Vector2i(0, 0), new Vector2i(0, HEIGHT))) //If snake will collide with right or left boundary of space
+				dir = new Vector2i(0, dir.y);
+			
+			snake.moveTowardsDir(dir);
 			
 			//Handle tile stuff
 			Tile tile = this.get(head.x, head.y);
