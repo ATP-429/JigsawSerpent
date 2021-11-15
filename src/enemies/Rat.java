@@ -10,7 +10,9 @@ public class Rat extends Entity
 	
 	public Rat(Vector2i pos)
 	{
-		super("rat", pos);
+		super("rat", pos); 
+		
+	
 	}
 	
 	public void update()
@@ -22,14 +24,28 @@ public class Rat extends Entity
 			if(Math.random() < PROB_OF_MOVING_PER_TICK)
 			{
 				if(Math.random() < 0.25)
+				{
+					texStr = "ratright";
 					this.addEvent(MotionEvent.MOTION_RIGHT());
+				}
 				else if(Math.random() < 0.5)
-					this.addEvent(MotionEvent.MOTION_LEFT());
+				{
+					texStr = "ratleft";
+						this.addEvent(MotionEvent.MOTION_LEFT());
+				}
 				else if(Math.random() < 0.75)
+				{
+					texStr = "ratup";
+				
 					this.addEvent(MotionEvent.MOTION_UP());
+				}
 				else
+				{
+					texStr = "rat";
+					
 					this.addEvent(MotionEvent.MOTION_DOWN());
+				}
 			}
 		}
-	}
+}
 }
