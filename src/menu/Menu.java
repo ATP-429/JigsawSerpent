@@ -4,16 +4,21 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JPanel;
-
 import Utility.Vector2i;
 import main.Camera;
+import main.Main;
 
 public class Menu
 {
+	Main game;
 	MenuHandler menuHandler;
 	
 	List<Button> buttons = new ArrayList<Button>();
+	
+	public Menu(Main game)
+	{
+		this.game = game;
+	}
 	
 	public void render(Camera cam, Graphics2D bg)
 	{

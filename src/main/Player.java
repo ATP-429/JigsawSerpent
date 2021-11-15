@@ -2,6 +2,8 @@ package main;
 
 public class Player
 {
+	public int insectCount, ratCount;
+	
 	private Snake snake;
 	private Inventory inventory;
 	private Input input;

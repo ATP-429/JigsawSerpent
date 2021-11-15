@@ -1,7 +1,6 @@
 package main;
 
 import java.awt.event.KeyEvent;
-
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.List;
 import Utility.Maths;
 import Utility.Vector2i;
 import enemies.Entity;
+import enemies.Rat;
 import events.AttackEvent;
 import events.SnakeEvent;
 import foods.Food;
@@ -66,7 +66,7 @@ public class Space
 			
 			Vector2i dir = snake.getDir(input.mouse);
 			
-			if (!events.isEmpty()) //If snake is doing some action, set dir to snake's direction
+			if (snake.action == Action.ATTACKING) //If snake is attacking, set dir to snake's direction
 				dir = snake.dir;
 			
 			//Handle collisions
@@ -88,6 +88,7 @@ public class Space
 				if (head.subtract(this.getCentreFrom(head.x, head.y)).getMagnitude() < ((Food) tile).getRadius())
 				{
 					snake.eat((Food) tile);
+					player.insectCount++;
 					this.clearTile(head.x, head.y);
 				}
 			}
@@ -97,6 +98,22 @@ public class Space
 				{
 					inventory.add((Item) tile);
 					this.clearTile(head.x, head.y);
+				}
+			}
+			
+			//Check if snake is eating any entity, only if snake is ATTACKING though
+			if (snake.action == Action.ATTACKING)
+			{
+				for (int i = 0; i < entities.size(); i++)
+				{
+					Entity entity = entities.get(i);
+					if (entity.getPos().distanceFrom(head) < 0.9)
+					{
+						if (entity instanceof Rat)
+							player.ratCount++;
+						entities.remove(i);
+						i--;
+					}
 				}
 			}
 		}

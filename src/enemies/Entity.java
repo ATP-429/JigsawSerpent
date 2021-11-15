@@ -48,7 +48,7 @@ public class Entity
 	public void render(Camera cam, Graphics2D bg)
 	{
 		Texture texture = TextureManager.get(texStr);
-		cam.drawImage(bg, texture.getImage(), pos.x, pos.y, 1.0, 1.0);
+		cam.drawImage(bg, texture.getImage(), pos.x-0.5, pos.y-0.5, 1.0, 1.0);
 	}
 	
 	public void setPos(Vector2i pos)

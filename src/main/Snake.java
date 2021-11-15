@@ -35,6 +35,8 @@ public class Snake
 	
 	public int speed = SNAKE_DEFAULT_SPEED;
 	
+	public Action action = Action.IDLE;
+	
 	private ArrayDeque<Vector2i> body;
 	private Vector2i tail, head;
 	private int foodEaten;
@@ -103,7 +105,9 @@ public class Snake
 	{
 		Vector2i prevSpine = this.getTail(), prevSpineLeft = null, prevSpineRight = null, nextSpineLeft = null, nextSpineRight = null;
 		int index = body.size(); //We set i to body.size() and then decrement it in the loop. This is because we want the front of the snake to remain constant
-		for (Vector2i dir : body)
+		Vector2i[] bodyArr = null;
+		bodyArr = body.toArray(new Vector2i[0]);
+		for (Vector2i dir : bodyArr)
 		{
 			Vector2i nextSpine = prevSpine.add(dir); //Next point that makes up the snake
 			
@@ -244,9 +248,4 @@ public class Snake
 	{
 		return events;
 	}
-}
-
-enum Action
-{
-	IDLE;
 }

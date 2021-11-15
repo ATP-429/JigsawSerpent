@@ -11,10 +11,8 @@ import java.awt.image.BufferedImage;
 import java.util.Stack;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
-import menu.Button;
-import menu.Menu;
+import menu.MainMenu;
 import menu.MenuHandler;
 import texture.TextureManager;
 
@@ -23,11 +21,11 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 	public static final int WIDTH = 1280, HEIGHT = 720;
 	public static final int RENDER_WIDTH = 1280, RENDER_HEIGHT = 720;
 	
+	public static Stack<Handler> handlerStack = new Stack<Handler>();
+	
 	public final int TICKS_PER_SECOND = 60;
 	
 	JFrame frame;
-	
-	Stack<Handler> handlerStack = new Stack<Handler>();
 	
 	MouseEvent prevMouseE;
 	boolean[] keys = new boolean[120];
@@ -74,27 +72,8 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 		//setLocationRelativeTo just sets the window's position on the screen with respect to another component 
 		frame.setLocationRelativeTo(null); //If the argument is 'null', it just puts the window at the centre of the screen
 		
-		GameHandler gameHandler = new GameHandler();
-		push(gameHandler);
-		gameHandler.start();
-		
 		MenuHandler menuHandler = new MenuHandler();
-		
-		Menu pauseMenu = new Menu();
-		Button startButton = new Button("start_button", 0, 0);
-		startButton.setOnClick(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				pop();
-				System.out.println("Game started");
-			}
-		});
-		pauseMenu.add(startButton);
-		
-		menuHandler.push(pauseMenu);
-		
+		menuHandler.push(new MainMenu(this));
 		push(menuHandler);
 		
 		long msPerFrame = 1000 / TICKS_PER_SECOND;
@@ -158,7 +137,8 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 	
 	public void update()
 	{
-		handlerStack.peek().update();
+		if(!handlerStack.isEmpty())
+			handlerStack.peek().update();
 	}
 	
 	@Override
@@ -183,7 +163,8 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 		bg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //Turn anti-aliasing on
 		bg.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE); //Just makes the graphics more accurate
 		
-		handlerStack.peek().render(bg);
+		if(!handlerStack.isEmpty())
+			handlerStack.peek().render(bg);
 		
 		//Draws bufferImg on our original canvas
 		g.drawImage(bufferImg, 0, 0, WIDTH, HEIGHT, null);
@@ -195,7 +176,7 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 		paint(g);
 	}
 	
-	private void push(Handler handler)
+	public void push(Handler handler)
 	{
 		if (!handlerStack.isEmpty())
 		{
@@ -212,7 +193,7 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 		addKeyListener(handler);
 	}
 	
-	private void pop()
+	public void pop()
 	{
 		Handler handler = handlerStack.peek();
 		removeMouseListener(handler);
@@ -220,7 +201,7 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 		removeMouseWheelListener(handler);
 		removeKeyListener(handler);
 		handlerStack.pop();
-		if(!handlerStack.isEmpty())
+		if (!handlerStack.isEmpty())
 		{
 			Handler prevHandler = handlerStack.peek();
 			addMouseListener(prevHandler);

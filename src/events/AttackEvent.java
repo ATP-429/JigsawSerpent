@@ -1,6 +1,6 @@
 package events;
 
-import Utility.Vector2i;
+import main.Action;
 import main.Snake;
 
 public class AttackEvent extends SnakeEvent
@@ -13,6 +13,7 @@ public class AttackEvent extends SnakeEvent
 	@Override
 	public void apply(Snake snake)
 	{
+		snake.action = Action.ATTACKING;
 		snake.speed = 3;
 		//snake.moveTowardsDir(snake.getBody().peekLast());
 		snake.dir = snake.getBody().peekLast();
@@ -21,6 +22,7 @@ public class AttackEvent extends SnakeEvent
 	@Override
 	public void end(Snake snake)
 	{
+		snake.action = Action.IDLE;
 		snake.speed = 1;
 	}
 }
