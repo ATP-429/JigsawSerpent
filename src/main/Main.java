@@ -137,7 +137,7 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 	
 	public void update()
 	{
-		if(!handlerStack.isEmpty())
+		if (!handlerStack.isEmpty())
 			handlerStack.peek().update();
 	}
 	
@@ -163,7 +163,7 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 		bg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //Turn anti-aliasing on
 		bg.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE); //Just makes the graphics more accurate
 		
-		if(!handlerStack.isEmpty())
+		if (!handlerStack.isEmpty())
 			handlerStack.peek().render(bg);
 		
 		//Draws bufferImg on our original canvas

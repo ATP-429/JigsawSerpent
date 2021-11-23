@@ -12,7 +12,7 @@ import texture.TextureManager;
 
 public class GameHandler extends Handler
 {
-	public final int DEFAULT_PPU = 32;
+	public final int DEFAULT_PPU = 64;
 	
 	public boolean initialized = false;
 	
@@ -33,20 +33,8 @@ public class GameHandler extends Handler
 		cam.calibrate(Main.RENDER_WIDTH, Main.RENDER_WIDTH, DEFAULT_PPU);
 		
 		space.put(5, 4, new BlueKey());
-		space.put(3, 9, new BlueKey());
-		space.put(15, 0, new BlueKey());
 		
-		Rat rat = new Rat(new Vector2i(5, 5));
-		
-		space.add(rat);
-		
-		for (int i = 10; i <= 20; i++)
-			for (int j = 10; j <= 20; j++)
-				space.put(i, j, new Food());
-			
 		space.add(player);
-		
-		player.getInventory().add(new BlueKey());
 		
 		initialized = true;
 	}

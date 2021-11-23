@@ -1,16 +1,15 @@
 package tiles;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 
 import main.Camera;
-import tiles.Tile;
 
-public class Wall implements Tile
+public class Wall extends Tile
 {
-	@Override
-	public void render(Camera cam, double x, double y, Graphics2D bg)
+	public Wall()
 	{
-		bg.setColor(Color.BLACK);
-		cam.fillRect(bg, x, y, 1, 1);
+		this.collision = true;
+		this.texStr = "metal_dark";
 	}
 }

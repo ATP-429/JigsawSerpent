@@ -38,4 +38,9 @@ public class Inventory
 			bg.drawRect(ITEM_SIZE*i, 0, ITEM_SIZE, ITEM_SIZE);
 		}
 	}
+
+	public void remove(Item item)
+	{
+		items.remove(item);
+	}
 }

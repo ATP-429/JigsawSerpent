@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import Utility.Maths;
 import Utility.Vector2i;
 import enemies.Entity;
 import enemies.Rat;
@@ -13,10 +12,16 @@ import events.AttackEvent;
 import events.SnakeEvent;
 import foods.Food;
 import items.Item;
+import keys.BlueKey;
+import tiles.BlueLock;
+import tiles.Grass;
 import tiles.Tile;
+import tiles.Wall;
 
 public class Space
 {
+	public static final Tile BACKGROUND_TILE = new Grass();
+	
 	private final int WIDTH = 100, HEIGHT = 100; //Number of tiles in x and y directions
 	
 	private List<Player> players;
@@ -28,6 +33,36 @@ public class Space
 		tiles = new Tile[getWIDTH()][getHEIGHT()];
 		players = new ArrayList<Player>();
 		entities = new ArrayList<Entity>();
+		
+		for (int i = 0; i < WIDTH; i++)
+			for (int j = 0; j < HEIGHT; j++)
+				tiles[i][j] = BACKGROUND_TILE;
+			
+		for (int i = 5; i <= 11; i++)
+		{
+			tiles[i][11] = new Wall();
+			tiles[i][5] = new Wall();
+		}
+		for (int i = 5; i <= 11; i++)
+		{
+			tiles[5][i] = new Wall();
+			tiles[11][i] = new Wall();
+		}
+		tiles[8][5] = new BlueLock();
+		
+		for (int i = 6; i <= 10; i++)
+			for (int j = 6; j <= 10; j++)
+				this.put(i, j, new Food());
+			
+		Rat rat = new Rat(new Vector2i(10.5, 10.5));
+		Rat rat2 = new Rat(new Vector2i(9.5, 9.5));
+		Rat rat3 = new Rat(new Vector2i(7.5, 7.5));
+		Rat rat4 = new Rat(new Vector2i(6.5, 6.5));
+		
+		this.add(rat);
+		this.add(rat2);
+		this.add(rat3);
+		this.add(rat4);
 	}
 	
 	public void update()
@@ -69,20 +104,56 @@ public class Space
 			if (snake.action == Action.ATTACKING) //If snake is attacking, set dir to snake's direction
 				dir = snake.dir;
 			
-			//Handle collisions
 			Vector2i finalPos = head.add(dir.multiply(snake.speed));
-			if (Maths.areIntersecting(head, finalPos, new Vector2i(0, 0), new Vector2i(WIDTH, 0)) || Maths.areIntersecting(head, finalPos, new Vector2i(0, HEIGHT), new Vector2i(WIDTH, HEIGHT))) //If snake will collide with upper or lower boundary of space
-				dir = new Vector2i(dir.x, 0);
-			finalPos = head.add(dir.multiply(snake.speed));
 			
-			if (Maths.areIntersecting(head, finalPos, new Vector2i(WIDTH, 0), new Vector2i(WIDTH, HEIGHT)) || Maths.areIntersecting(head, finalPos, new Vector2i(0, 0), new Vector2i(0, HEIGHT))) //If snake will collide with right or left boundary of space
-				dir = new Vector2i(0, dir.y);
+			//Handle collisions
+			if (!available(finalPos))
+			{
+				double xDir = dir.x, yDir = dir.y;
+				//See if it works when we set movement along x-axis
+				dir = new Vector2i(xDir, 0);
+				
+				finalPos = head.add(dir.multiply(snake.speed));
+				
+				if (!available(finalPos)) //If that didn't work, see if it works when we set movement along y-axis
+					dir = new Vector2i(0, yDir);
+				
+				finalPos = head.add(dir.multiply(snake.speed));
+				
+				if (!available(finalPos)) //If that didn't work either, just set dir to 0,0
+					dir = Vector2i.NULL_VECTOR;
+			}
 			
-			snake.moveTowardsDir(dir);
+			if (dir.getMagnitude() != 0) //If dir is 0, don't move snake, otherwise the tail moves forward while the head remains where it is, compressing the snake
+				snake.moveTowardsDir(dir);
 			
 			//Handle tile stuff
-			Tile tile = this.get(head.x, head.y);
 			
+			//Check surrounding tiles and remove locks if user has key
+			for (int cx = -1; cx <= 1; cx++)
+			{
+				for (int cy = -1; cy <= 1; cy++)
+				{
+					Tile t = this.get(head.x - cx, head.y - cy);
+					if (t instanceof Wall)
+					{
+						if (t instanceof BlueLock)
+						{
+							for (Item item : inventory.getItems())
+							{
+								if (item instanceof BlueKey)
+								{
+									inventory.remove(item);
+									this.clearTile(head.x - cx, head.y - cy);
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			Tile tile = this.get(head.x, head.y);
 			if (tile instanceof Food)
 			{
 				if (head.subtract(this.getCentreFrom(head.x, head.y)).getMagnitude() < ((Food) tile).getRadius())
@@ -110,7 +181,10 @@ public class Space
 					if (entity.getPos().distanceFrom(head) < 0.9)
 					{
 						if (entity instanceof Rat)
+						{
 							player.ratCount++;
+							snake.eat(entity.getFoodValue());
+						}
 						entities.remove(i);
 						i--;
 					}
@@ -122,6 +196,15 @@ public class Space
 		{
 			entity.update();
 		}
+	}
+	
+	private boolean available(Vector2i pos)
+	{
+		if (pos.x < 0 || pos.y < 0 || pos.x > WIDTH || pos.y > HEIGHT)
+			return false;
+		if (get(pos.x, pos.y) != null)
+			return !get(pos.x, pos.y).hasCollision();
+		return false;
 	}
 	
 	public void put(double x, double y, Tile tile)
@@ -150,7 +233,7 @@ public class Space
 	{
 		int ix = (int) x, iy = (int) y;
 		if (ix >= 0 && iy >= 0 && ix < WIDTH && iy < HEIGHT)
-			tiles[(int) x][(int) y] = null;
+			tiles[(int) x][(int) y] = new Grass();
 	}
 	
 	public List<Player> getPlayers()
@@ -179,5 +262,10 @@ public class Space
 	public int getHEIGHT()
 	{
 		return HEIGHT;
+	}
+	
+	public Tile getBackground()
+	{
+		return BACKGROUND_TILE;
 	}
 }

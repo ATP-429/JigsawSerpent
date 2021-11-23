@@ -1,7 +1,6 @@
 package enemies;
 
 import Utility.Vector2i;
-import events.Event;
 import events.MotionEvent;
 
 public class Rat extends Entity
@@ -10,42 +9,44 @@ public class Rat extends Entity
 	
 	public Rat(Vector2i pos)
 	{
-		super("rat", pos); 
-		
-	
+		super("rat", pos);
 	}
 	
 	public void update()
 	{
 		super.update();
 		
-		if(events.size() == 0)
+		if (events.size() == 0)
 		{
-			if(Math.random() < PROB_OF_MOVING_PER_TICK)
+			if (Math.random() < PROB_OF_MOVING_PER_TICK)
 			{
-				if(Math.random() < 0.25)
+				if (Math.random() < 0.25)
 				{
 					texStr = "ratright";
 					this.addEvent(MotionEvent.MOTION_RIGHT());
 				}
-				else if(Math.random() < 0.5)
+				else if (Math.random() < 0.5)
 				{
 					texStr = "ratleft";
-						this.addEvent(MotionEvent.MOTION_LEFT());
+					this.addEvent(MotionEvent.MOTION_LEFT());
 				}
-				else if(Math.random() < 0.75)
+				else if (Math.random() < 0.75)
 				{
 					texStr = "ratup";
-				
 					this.addEvent(MotionEvent.MOTION_UP());
 				}
 				else
 				{
 					texStr = "rat";
-					
 					this.addEvent(MotionEvent.MOTION_DOWN());
 				}
 			}
 		}
-}
+	}
+	
+	@Override
+	public int getFoodValue()
+	{
+		return 20;
+	}
 }

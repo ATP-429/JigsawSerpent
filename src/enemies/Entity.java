@@ -65,4 +65,9 @@ public class Entity
 	{
 		this.pos = this.pos.add(delta);
 	}
+	
+	public int getFoodValue()
+	{
+		return 0;
+	}
 }

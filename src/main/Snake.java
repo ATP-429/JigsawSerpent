@@ -203,6 +203,11 @@ public class Snake
 		foodEaten += food.getSize();
 	}
 	
+	public void eat(int foodValue)
+	{
+		foodEaten += foodValue;
+	}
+	
 	public void addBody(Vector2i dir)
 	{
 		body.addLast(dir);

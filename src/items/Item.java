@@ -7,26 +7,8 @@ import texture.Texture;
 import texture.TextureManager;
 import tiles.Tile;
 
-public class Item implements Tile
+public class Item extends Tile
 {
-	protected String texStr;
-	
-	public Item()
-	{
-		
-	}
-	
-	public Item(String texStr)
-	{
-		this.texStr = texStr;
-	}
-	
-	@Override
-	public void render(Camera cam, double x, double y, Graphics2D bg)
-	{
-		cam.drawImage(bg, TextureManager.get(texStr).getImage(), x, y, 1.0, 1.0);
-	}
-	
 	public Texture getTexture()
 	{
 		return TextureManager.get(texStr);
