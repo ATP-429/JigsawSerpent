@@ -8,9 +8,10 @@ import javax.swing.JButton;
 import texture.Texture;
 import texture.TextureManager;
 
-public class Button extends JButton
+public class Button
 {
 	private String texStr;
+	private boolean hover;
 	
 	int width, height, x, y;
 	
@@ -18,7 +19,6 @@ public class Button extends JButton
 	
 	public Button(String texStr, int x, int y)
 	{
-		super(texStr);
 		Texture texture = TextureManager.get(texStr);
 		width = texture.getWidth();
 		height = texture.getHeight();
@@ -41,5 +41,15 @@ public class Button extends JButton
 	public BufferedImage getImage()
 	{
 		return TextureManager.get(texStr).getImage();
+	}
+	
+	public void setHover(boolean val)
+	{
+		hover = val;
+	}
+	
+	public boolean isHovered()
+	{
+		return hover;
 	}
 }

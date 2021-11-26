@@ -5,11 +5,14 @@ import enemies.Entity;
 
 public class MotionEvent extends Event
 {
+	public Vector2i deltaPerTick;
+	
 	public MotionEvent()
 	{
 		super();
+		this.deltaPerTick = new Vector2i(1.0 / 60, 0);
 		super.eventFunction = (Entity e) -> {
-			e.movePos(new Vector2i(1.0 / 60, 0));
+			e.movePos(deltaPerTick);
 			return null;
 		};
 	}
@@ -17,6 +20,7 @@ public class MotionEvent extends Event
 	public MotionEvent(Vector2i deltaPerTick)
 	{
 		super();
+		this.deltaPerTick = deltaPerTick;
 		super.eventFunction = (Entity e) -> {
 			e.movePos(deltaPerTick);
 			return null;
@@ -26,6 +30,7 @@ public class MotionEvent extends Event
 	public MotionEvent(Vector2i deltaPerTick, int time)
 	{
 		super(time);
+		this.deltaPerTick = deltaPerTick;
 		super.eventFunction = (Entity e) -> {
 			e.movePos(deltaPerTick);
 			return null;

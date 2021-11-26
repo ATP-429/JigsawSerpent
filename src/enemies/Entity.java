@@ -25,19 +25,7 @@ public class Entity
 	
 	public void update()
 	{
-		for(int i = 0; i < events.size(); i++)
-		{
-			Event event = events.get(i);
-			
-			event.apply(this);
-			
-			event.tick();
-			if(event.isOver())
-			{
-				events.remove(i);
-				i--;
-			}
-		}
+		
 	}
 	
 	public void addEvent(Event event)
@@ -69,5 +57,10 @@ public class Entity
 	public int getFoodValue()
 	{
 		return 0;
+	}
+	
+	public List<Event> getEvents()
+	{
+		return events;
 	}
 }

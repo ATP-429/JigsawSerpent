@@ -2,7 +2,7 @@ package main;
 
 public class Player
 {
-	public int insectCount, ratCount;
+	public int insectCount, ratCount, flyCount, bigFlyCount;
 	
 	private Snake snake;
 	private Inventory inventory;

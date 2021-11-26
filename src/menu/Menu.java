@@ -1,5 +1,7 @@
 package menu;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,16 @@ public class Menu
 	{
 		cam.translate(bg);
 		for (Button button : buttons)
+		{
 			cam.drawImage(bg, button.getImage(), button.x, button.y, button.width, button.height);
+			if (button.isHovered())
+			{
+				bg.setColor(new Color(255, 255, 255, 128));
+				bg.setStroke(new BasicStroke((int) (cam.getPPU() * 3)));
+				cam.drawRect(bg, button.x, button.y, button.width, button.height);
+				bg.setStroke(new BasicStroke(1));
+			}
+		}
 		cam.reset(bg);
 	}
 	
@@ -41,6 +52,17 @@ public class Menu
 			{
 				button.onClick.run();
 			}
+		}
+	}
+	
+	public void hoverAt(Vector2i pos)
+	{
+		for (Button button : buttons)
+		{
+			if (pos.x >= button.x && pos.x < button.x + button.width && pos.y >= button.y && pos.y < button.y + button.height)
+				button.setHover(true);
+			else
+				button.setHover(false);
 		}
 	}
 }

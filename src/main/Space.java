@@ -9,7 +9,11 @@ import Utility.Vector2i;
 import enemies.Entity;
 import enemies.Rat;
 import events.AttackEvent;
+import events.Event;
+import events.MotionEvent;
 import events.SnakeEvent;
+import foods.BigFly;
+import foods.Fly;
 import foods.Food;
 import items.Item;
 import keys.BlueKey;
@@ -51,9 +55,24 @@ public class Space
 		tiles[8][5] = new BlueLock();
 		
 		for (int i = 6; i <= 10; i++)
+		{
 			for (int j = 6; j <= 10; j++)
-				this.put(i, j, new Food());
-			
+			{
+				int rand = (int) (Math.random() * 3);
+				switch (rand)
+				{
+					case 0:
+						this.put(i, j, new Food());
+						break;
+					case 1:
+						this.put(i, j, new Fly());
+						break;
+					case 2:
+						this.put(i, j, new BigFly());
+				}
+			}
+		}
+		
 		Rat rat = new Rat(new Vector2i(10.5, 10.5));
 		Rat rat2 = new Rat(new Vector2i(9.5, 9.5));
 		Rat rat3 = new Rat(new Vector2i(7.5, 7.5));
@@ -159,7 +178,12 @@ public class Space
 				if (head.subtract(this.getCentreFrom(head.x, head.y)).getMagnitude() < ((Food) tile).getRadius())
 				{
 					snake.eat((Food) tile);
-					player.insectCount++;
+					if (tile instanceof Fly)
+						player.flyCount++;
+					else if (tile instanceof BigFly)
+						player.bigFlyCount++;
+					else if (tile instanceof Food)
+						player.insectCount++;
 					this.clearTile(head.x, head.y);
 				}
 			}
@@ -195,6 +219,28 @@ public class Space
 		for (Entity entity : entities)
 		{
 			entity.update();
+			
+			List<Event> events = entity.getEvents();
+			for (int i = 0; i < events.size(); i++)
+			{
+				Event event = events.get(i);
+				
+				if (event instanceof MotionEvent)
+				{
+					Vector2i finPos = entity.getPos().add(((MotionEvent) event).deltaPerTick);
+					if (this.available(finPos))
+						event.apply(entity);
+				}
+				else
+					event.apply(entity);
+				
+				event.tick();
+				if (event.isOver())
+				{
+					events.remove(i);
+					i--;
+				}
+			}
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package menu;
 
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.Stack;
@@ -46,8 +47,24 @@ public class MenuHandler extends Handler
 	}
 	
 	@Override
+	public void mouseMoved(MouseEvent e)
+	{
+		Menu menu = menuStack.peek();
+		menu.hoverAt(cam.getAbsoluteLocation(getPixelRelativeTo(e)));
+	}
+	
+	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		//Do nothing, since we don't want user to be able to zoom in menu
+	}
+	
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+			menuStack.pop();
+		if (menuStack.isEmpty())
+			System.exit(0);
 	}
 }

@@ -16,6 +16,14 @@ public class Camera
 	private double fontHeight = 0.4; //Height of font in units IN SPACE DIMENSIONS
 	private double fontOffset = 0.1; //Offset of font from the axes IN SPACE DIMENSIONS
 	
+	//Stores the values by which cam should reset by after being translated.
+	//The reason we need to store them here is that when we call translate(bg), the pos of the camera is at some point A, say.
+	//After we finish doing whatever drawing we want, the pos of the camera changes because of the other thread in update(), to some point B.
+	//Thus, when we reset, we don't actually reset back to the initial position of the camera.
+	//This caused a lot of flickering of the UI and snake, which we initially weren't able to figure out why and just ignored the problem.
+	//Now, when we call translate, we just store the values in the variables below and just reset by these values.
+	private double resetX, resetY;
+	
 	public Camera()
 	{
 		
@@ -110,7 +118,7 @@ public class Camera
 			for (int y = (int) yDown; y <= yUp; y++)
 				if (space.get(x, y) != null)
 					space.getBackground().render(this, x, y, bg);
-		
+				
 		//Draws the visible tiles
 		for (int x = (int) xLeft; x <= xRight; x++)
 			for (int y = (int) yDown; y <= yUp; y++)
@@ -138,13 +146,15 @@ public class Camera
 	//Sets centre of our drawing screen to centre of camera
 	public void translate(Graphics2D bg)
 	{
+		resetX = pos.x * ppu;
+		resetY = pos.y * ppu;
 		bg.translate(-pos.x * ppu, -pos.y * ppu);
 	}
 	
 	//Resets drawing coords back to normal
 	public void reset(Graphics2D bg)
 	{
-		bg.translate(pos.x * ppu, pos.y * ppu);
+		bg.translate(resetX, resetY);
 	}
 	
 	//Returns bounds of this camera, more specifically, returns the top-left and the bottom-right coordinates of the camera's view

@@ -62,6 +62,8 @@ public class Main extends Canvas //Basically, 'extends Canvas' just makes any Ma
 		frame.setResizable(false); //Now window cannot be resized by moving its borders
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		//frame.setUndecorated(true);
+		
 		//Adds 'this' object to the frame. 'this' refers to the object that is executing this function, that is, the 'game' object we declared above in main(). 
 		frame.add(this); //Basically, it's adding the 'game' object (Which is just a canvas) to the window, so anything we draw on the canvas will now be visible on the frame
 		
